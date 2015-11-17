@@ -13,6 +13,23 @@ import (
 
 var dirRe = regexp.MustCompile(`^tmpfriend-([0-9]+)-.*$`)
 
+// SetupOrNOOP is the expected way to use tmpfriend. It is a wrapper around
+// RootTempDir and IsTmpFriendDir. It will always return a cleanup function,
+// and will do a NOOP under error.
+//
+//   cleanup := tmpfriend.SetupOrNOOP()
+//   defer cleanup()
+//   ...
+func SetupOrNOOP() func() {
+	if !IsTmpFriendDir("") {
+		cleanup, err := RootTempDir("")
+		if err == nil {
+			return cleanup
+		}
+	}
+	return func() {}
+}
+
 // RootTempDir creates a new TMPDIR tied to this process, as well as cleaning
 // up TMPDIRs from defunct processes.
 //
