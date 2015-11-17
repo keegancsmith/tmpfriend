@@ -11,6 +11,8 @@ import (
 	"syscall"
 )
 
+var dirRe = regexp.MustCompile(`^tmpfriend-([0-9]+)-.*$`)
+
 // RootTempDir creates a new TMPDIR tied to this process, as well as cleaning
 // up TMPDIRs from defunct processes.
 //
@@ -21,11 +23,13 @@ import (
 //
 // To use put code like this somewhere like `func main()`
 //
-//   f, err := tmpfriend.RootTempDir("")
-//   if err != nil {
-//     return err
+//   if !IsTmpFriendDir("") {
+//     f, err := tmpfriend.RootTempDir("")
+//     if err != nil {
+//       return err
+//     }
+//     defer f()
 //   }
-//   defer f()
 //   ...
 func RootTempDir(rootDir string) (func(), error) {
 	if rootDir == "" {
@@ -47,15 +51,22 @@ func RootTempDir(rootDir string) (func(), error) {
 	}, nil
 }
 
+// IsTmpFriendDir returns true if we are in a tmpfriend dir.
+func IsTmpFriendDir(rootDir string) bool {
+	if rootDir == "" {
+		rootDir = os.TempDir()
+	}
+	return dirRe.MatchString(filepath.Base(rootDir))
+}
+
 func clean(rootDir string) {
-	var p = regexp.MustCompile(`^tmpfriend-([0-9]+)-.*$`)
 	list, err := ioutil.ReadDir(rootDir)
 	if err != nil {
 		log.Printf("tmpfriend: Failed to read dir %s: %s", rootDir, err)
 		return
 	}
 	for _, d := range list {
-		m := p.FindStringSubmatch(d.Name())
+		m := dirRe.FindStringSubmatch(d.Name())
 		if len(m) == 0 {
 			continue
 		}
