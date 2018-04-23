@@ -1,4 +1,4 @@
-# tmpfriend
+# tmpfriend [![Travis-CI](https://travis-ci.org/keegancsmith/tmpfriend.svg)](https://travis-ci.org/keegancsmith/tmpfriend) [![GoDoc](https://godoc.org/github.com/keegancsmith/tmpfriend?status.svg)](http://godoc.org/github.com/keegancsmith/tmpfriend)
 
 `tmpfriend` is a Go library to help prevent misbehaving subprocesses / code
 from forgetting to cleanup after themselves. It works by modifying the
